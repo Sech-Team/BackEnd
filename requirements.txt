@@ -1,0 +1,4 @@
+pip freeze > requirements.txt
+Flask==3.0.0
+Flask-CORS==3.0.10
+gunicorn==21.2.0
