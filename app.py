@@ -24,7 +24,7 @@ def process():
             float(data['value6']),
         ]
         result = process_data(values)
-        return jsonify({'result': result})
+        return jsonify({'result': "Thien gay"})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
