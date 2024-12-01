@@ -4,8 +4,11 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  
 
+def multiply(values):
+    return values[0] * values[1] * values[2] * values[3] * values[4] * values[5]
+
 def process_data(values):
-    result = sum(values)
+    result = multiply(values)
     return result
 
 @app.route('/process', methods=['POST'])
