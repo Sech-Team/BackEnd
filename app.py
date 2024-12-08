@@ -1,15 +1,16 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS  
 
+from cal import cal_predict
 app = Flask(__name__)
 CORS(app)  
 
-def multiply(values):
-    return values[0] * values[1] * values[2] * values[3] * values[4] * values[5]
+# def multiply(values):
+#     return values[0] * values[1] * values[2] * values[3] * values[4] * values[5]
 
-def process_data(values):
-    result = multiply(values)
-    return result
+# def process_data(values):
+#     result = multiply(values)
+#     return result
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -23,8 +24,8 @@ def process():
             float(data['value5']),
             float(data['value6']),
         ]
-        result = process_data(values)
-        return jsonify({'result': "Thien gay"})
+        result = cal_predict(values)
+        return jsonify({'result': result})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
