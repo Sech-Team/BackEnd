@@ -172,8 +172,9 @@ def cal_predict(newdata):
     #     float(input("Longitude: "))]
     newdata_df = pd.DataFrame([newdata], columns=X_train.columns)
     newdata_scaled = lib_Norm_Feature_Scaling(newdata_df, X_train_scaler)
-
-    newdata.append(predict_value(newdata_scaled.iloc[0], X_train, Y_train, k))
+    new = predict_value(newdata_scaled.iloc[0], X_train, Y_train, k)
+    newdata.append(new)
 
     newdata = pd.DataFrame([newdata], columns=data_read.columns)
     update(newdata, "./real_estate.csv")
+    return new
