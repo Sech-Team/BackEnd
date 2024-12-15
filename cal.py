@@ -8,10 +8,43 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsRegressor
+import os
+import boto3
+from dotenv import load_dotenv
+from io import StringIO
 
+load_dotenv()
+AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
+S3_FILE_KEY = "real_estate.csv"
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY,
+)
+
+def read_csv():
+    try:
+        obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY)
+        df = pd.read_csv(obj["Body"])  # Đọc dữ liệu từ nội dung file
+        return df.to_dict(orient="records")
+    except Exception as e:
+        print(f"Error reading CSV: {e}")
+        return []
+def update_csv(new_data):
+    try:
+        csv_buffer = StringIO()
+        df = pd.DataFrame(new_data)
+        df.to_csv(csv_buffer, index=False)  # Lưu dữ liệu vào bộ nhớ tạm
+        s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY, Body=csv_buffer.getvalue())
+        return True
+    except Exception as e:
+        print(f"Error updating CSV: {e}")
+        return False
 # Ham doc du lieu vao tu CSV
 def read():
-    data = pd.read_csv("./real_estate.csv", index_col="No")
+    data = read_csv()
     return data
 
 # Ham loc du lieu tach du lieu vao va gia tri muc tieu
@@ -88,11 +121,12 @@ def predict_values(test, train, train_label, k):
     Y_predict = pd.DataFrame(predictions, index=test.index, columns=["Predicted Values"])
     return Y_predict
 
-def update( new_data, path):
-    data = pd.read_csv(path, index_col="No")
-    new_data_df = pd.DataFrame(new_data)
-    data = pd.concat([data, new_data_df], ignore_index="No")
-    data.to_csv(path, index_label="No")
+def update( new_data):
+    # data = pd.read_csv(path, index_col="No")
+    # new_data_df = pd.DataFrame(new_data)
+    # data = pd.concat([data, new_data_df], ignore_index="No")
+    # data.to_csv(path, index_label="No")
+    success = update_csv(new_data)
     
 def cal_predict(newdata):
     # Doc du lieu
@@ -122,59 +156,15 @@ def cal_predict(newdata):
     Y_test_Max = get_max(Y_test.to_frame())
     Y_test_Min = get_min(Y_test.to_frame())
 
-    # print("Max values in X_test:")
-    # print(X_test_Max)
-    # print("Min values in X_test:")
-    # print(X_test_Min)
-
-    # Chuan hoa du lieu
     X_test = lib_Norm_Feature_Scaling(X_test, X_test_scaler)
     X_train = lib_Norm_Feature_Scaling(X_train, X_train_scaler)
-    
     k = 22
     Y_predicted = predict_values(X_test, X_train, Y_train, k)
-    # Tạo bảng so sánh 
-    # comparison = pd.DataFrame({"Y_test": Y_test.values, "Y_predicted": Y_predicted["Predicted Values"].values}, index=Y_test.index)
-    # print("Bảng so sánh giữa Y_test và Y_predicted:")
-    # print(comparison)
-    # r2 = r2_score(Y_test, Y_predicted)
-    # print(f"R^2 Score {k}: {r2}")
-
-    # neighbors = np.arange(1, 100)
-    # train_accuracy = np.empty(len(neighbors))
-    # test_accuracy = np.empty(len(neighbors))
-  
-    # # Loop over K values 
-    # for i, k in enumerate(neighbors): 
-    #     knn = KNeighborsRegressor(n_neighbors=k) 
-    #     knn.fit(X_train, Y_train) 
-        
-    #     # Compute training and test data accuracy 
-    #     train_accuracy[i] = knn.score(X_train, Y_train) 
-    #     test_accuracy[i] = knn.score(X_test, Y_test) 
-    
-    # # Generate plot 
-    # plt.plot(neighbors, test_accuracy, label='Testing dataset Accuracy') 
-    # plt.plot(neighbors, train_accuracy, label='Training dataset Accuracy') 
-
-    # plt.legend() 
-    # plt.xlabel('n_neighbors') 
-    # plt.ylabel('Accuracy') 
-    # plt.title('KNN Varying number of neighbors')
-    # plt.show() 
-
-    #update
-    # newdata = [ float(input("Transaction date: ")),
-    #     float(input("House age: ")),
-    #     float(input("Distance to the nearest MRT station: ")),
-    #     float(input("Number of convenience stores: ")),
-    #     float(input("Latitude: ")),
-    #     float(input("Longitude: "))]
     newdata_df = pd.DataFrame([newdata], columns=X_train.columns)
     newdata_scaled = lib_Norm_Feature_Scaling(newdata_df, X_train_scaler)
     new = predict_value(newdata_scaled.iloc[0], X_train, Y_train, k)
     newdata.append(new)
 
     newdata = pd.DataFrame([newdata], columns=data_read.columns)
-    update(newdata, "./real_estate.csv")
+    update(newdata)
     return new
