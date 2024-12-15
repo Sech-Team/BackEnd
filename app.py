@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS  
 
-from cal import cal_predict
+from cal import *
 app = Flask(__name__)
 CORS(app)  
 
@@ -26,6 +26,15 @@ def process():
         ]
         result = cal_predict(values)
         return jsonify({'result': result})
+    except Exception as e:
+        print(f"Lỗi xử lý: {e}")
+        return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
+
+@app.route('/showcsv', methods=['POST'])
+def showcsv():
+    try:
+        data = read()
+        return jsonify({'result': data.to_json()})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
