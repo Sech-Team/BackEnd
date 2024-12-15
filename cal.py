@@ -24,28 +24,20 @@ s3 = boto3.client(
     aws_secret_access_key=AWS_SECRET_KEY,
 )
 
-def read_csv():
+# Ham doc du lieu vao tu CSV
+def read():
     try:
         obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY)
-        df = pd.read_csv(obj["Body"])  # Đọc dữ liệu từ nội dung file
-        return df.to_dict(orient="records")
+        df = obj['Body'].read().decode('utf-8')  
+        df = pd.read_csv(StringIO(df), index_col="No")
+
+        return df
     except Exception as e:
         print(f"Error reading CSV: {e}")
         return []
-def update_csv(new_data):
-    try:
-        csv_buffer = StringIO()
-        df = pd.DataFrame(new_data)
-        df.to_csv(csv_buffer, index=False)  # Lưu dữ liệu vào bộ nhớ tạm
-        s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY, Body=csv_buffer.getvalue())
-        return True
-    except Exception as e:
-        print(f"Error updating CSV: {e}")
-        return False
-# Ham doc du lieu vao tu CSV
-def read():
-    data = read_csv()
-    return data
+    # data = pd.read_csv("./real_estate.csv", index_col="No")
+
+    # return data
 
 # Ham loc du lieu tach du lieu vao va gia tri muc tieu
 def split_data(data):
@@ -121,12 +113,14 @@ def predict_values(test, train, train_label, k):
     Y_predict = pd.DataFrame(predictions, index=test.index, columns=["Predicted Values"])
     return Y_predict
 
-def update( new_data):
-    # data = pd.read_csv(path, index_col="No")
-    # new_data_df = pd.DataFrame(new_data)
-    # data = pd.concat([data, new_data_df], ignore_index="No")
-    # data.to_csv(path, index_label="No")
-    success = update_csv(new_data)
+def update(new_data, path="real_estate.csv"):
+    csv_buffer = StringIO()
+
+    data = read()
+    new_data_df = pd.DataFrame(new_data)
+    data = pd.concat([data, new_data_df], ignore_index="No")
+    data.to_csv(csv_buffer, index_label="No")
+    s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY, Body=csv_buffer.getvalue())
     
 def cal_predict(newdata):
     # Doc du lieu
@@ -158,8 +152,10 @@ def cal_predict(newdata):
 
     X_test = lib_Norm_Feature_Scaling(X_test, X_test_scaler)
     X_train = lib_Norm_Feature_Scaling(X_train, X_train_scaler)
+    
     k = 22
     Y_predicted = predict_values(X_test, X_train, Y_train, k)
+
     newdata_df = pd.DataFrame([newdata], columns=X_train.columns)
     newdata_scaled = lib_Norm_Feature_Scaling(newdata_df, X_train_scaler)
     new = predict_value(newdata_scaled.iloc[0], X_train, Y_train, k)

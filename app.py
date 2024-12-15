@@ -5,12 +5,12 @@ from cal import cal_predict
 app = Flask(__name__)
 CORS(app)  
 
-# def multiply(values):
-#     return values[0] * values[1] * values[2] * values[3] * values[4] * values[5]
+def multiply(values):
+    return values[0] * values[1] * values[2] * values[3] * values[4] * values[5]
 
-# def process_data(values):
-#     result = multiply(values)
-#     return result
+def process_data(values):
+    result = multiply(values)
+    return result
 
 @app.route('/process', methods=['POST'])
 def process():
