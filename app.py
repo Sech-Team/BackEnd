@@ -33,7 +33,25 @@ def process():
 @app.route('/showcsv', methods=['POST'])
 def showcsv():
     try:
-        data = read()
+        r = request.get_json()
+        values = [
+            float(r['value1a']), 
+            float(r['value1b']),
+            float(r['value2a']), 
+            float(r['value2b']),
+            float(r['value3a']),
+            float(r['value3b']),
+            float(r['value4a']),
+            float(r['value4b']),
+            float(r['value5a']),
+            float(r['value5b']),
+            float(r['value6a']),
+            float(r['value6b'])
+        ]
+        # print(values)
+        # data = filter(read(), values)
+        # data = read()
+        data = filter(read(), values)
         return jsonify({'result': data.to_html()})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
