@@ -79,20 +79,28 @@ def cal_predict(newdata):
     update(newdata)
     return new
 
-def filter(data, values):
+def filter(df, values):
     # values[0] and values[1] are the range of the first column
     # values[2] and values[3] are the range of the second column
     # values[4] and values[5] are the range of the third column
     # values[6] and values[7] are the range of the fourth column
     # values[8] and values[9] are the range of the fifth column
     # values[10] and values[11] is the range of the sixth column
-    # print(data)
-    data = data[
-        (data["X1 transaction date"] >= values[0]) & (data["X1 transaction date"] <= values[1]) 
-        & (data["X2 house age"] >= values[2]) & (data["X2 house age"] <= values[3])
-        & (data["X3 distance to the nearest MRT station"] >= values[4]) & (data["X3 distance to the nearest MRT station"] <= values[5])
-        & (data["X4 number of convenience stores"] >= values[6]) & (data["X4 number of convenience stores"] <= values[7])
-        & (data["X5 latitude"] >= values[8]) & (data["X5 latitude"] <= values[9])
-        & (data["X6 longitude"] >= values[10]) & (data["X6 longitude"] <= values[11])]
-    # print(data)
-    return data
+    minConstraint = df.min()
+    maxConstraint = df.max()
+    columns = df.columns.tolist()
+    print(columns)
+    j = 0
+    for i in range(0, 12, 2):
+        minConstraint[columns[j]] = values[i]
+        j = j + 1
+    j = 0
+    for i in range(1, 12, 2):
+        maxConstraint[columns[j]] = values[i]
+        j = j + 1
+
+    for col in columns:
+        df = df[minConstraint[col] <= df[col]]
+        df = df[df[col] <= maxConstraint[col]]
+    
+    return df
