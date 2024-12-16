@@ -37,7 +37,6 @@ def update(new_data):
     s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY, Body=csv_buffer.getvalue())
 
 def cal_predict(new_data):
-    pd.set_option('future.no_silent_downcasting', True)
     data_read = read()
 
     X, Y = split_data(data_read)
