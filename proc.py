@@ -77,7 +77,7 @@ def replace_missing_with_mean(data, base):
     for col in data.columns:
         if col in base.columns and data[col].isnull().sum() > 0:
             mean_value = base[col].mean()
-            data[col] = data[col].fillna(mean_value).infer_objects(copy=False)
+            data[col].fillna(mean_value, inplace=True)
     return data
 
 def judge_knn(X_train, X_test, Y_train, Y_test, k_values):
