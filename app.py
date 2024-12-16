@@ -34,7 +34,7 @@ def process():
 def showcsv():
     try:
         data = read()
-        return jsonify({'result': data.to_json()})
+        return jsonify({'result': data.to_html()})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
