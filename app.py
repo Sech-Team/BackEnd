@@ -48,7 +48,7 @@ def showcsv():
             float(r['value6a']),
             float(r['value6b'])
         ]
-        # print(values)
+        # print(values) 
         # data = filter(read(), values)
         # data = read()
         data = filter(read(), values)
