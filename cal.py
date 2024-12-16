@@ -89,7 +89,6 @@ def filter(df, values):
     minConstraint = df.min()
     maxConstraint = df.max()
     columns = df.columns.tolist()
-    print(columns)
     j = 0
     for i in range(0, 12, 2):
         minConstraint[columns[j]] = values[i]
@@ -102,5 +101,7 @@ def filter(df, values):
     for col in columns:
         df = df[minConstraint[col] <= df[col]]
         df = df[df[col] <= maxConstraint[col]]
-    
+    df = df.reset_index()
+    df = df.reset_index(drop=True)
+
     return df

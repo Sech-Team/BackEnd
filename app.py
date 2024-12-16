@@ -52,7 +52,7 @@ def showcsv():
         # data = filter(read(), values)
         # data = read()
         data = filter(read(), values)
-        return jsonify({'result': data.to_html()})
+        return jsonify({'result': data.to_html(index=False)})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
