@@ -5,26 +5,21 @@ from cal import *
 app = Flask(__name__)
 CORS(app)  
 
-def multiply(values):
-    return values[0] * values[1] * values[2] * values[3] * values[4] * values[5]
-
-def process_data(values):
-    result = multiply(values)
-    return result
-
 @app.route('/process', methods=['POST'])
 def process():
+    
     try:
         data = request.get_json()
         values = [
-            float(data['value1']),
-            float(data['value2']),
-            float(data['value3']),
-            float(data['value4']),
-            float(data['value5']),
-            float(data['value6']),
+            float(data['value1']) if data['value1'] is not None else None,
+            float(data['value2']) if data['value2'] is not None else None,
+            float(data['value3']) if data['value3'] is not None else None,
+            float(data['value4']) if data['value4'] is not None else None,
+            float(data['value5']) if data['value5'] is not None else None,
+            float(data['value6']) if data['value6'] is not None else None,
         ]
         result = cal_predict(values)
+        # print(values)
         return jsonify({'result': result})
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
@@ -48,9 +43,6 @@ def showcsv():
             float(r['value6a']),
             float(r['value6b'])
         ]
-        # print(values) 
-        # data = filter(read(), values)
-        # data = read()
         data = filter(read(), values)
         return jsonify({'result': data.to_html(index=False)})
     except Exception as e:

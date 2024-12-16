@@ -1,8 +1,8 @@
-from sklearn.preprocessing import MinMaxScaler
 import os
 import boto3
 from dotenv import load_dotenv
 from io import StringIO
+import pandas as pd
 from proc import *
 load_dotenv()
 AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
@@ -35,49 +35,25 @@ def update(new_data):
     data = pd.concat([data, new_data_df], ignore_index="No")
     data.to_csv(csv_buffer, index_label="No")
     s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY, Body=csv_buffer.getvalue())
-    
-def cal_predict(newdata):
-    # Doc du lieu
+
+def cal_predict(new_data):
+    pd.set_option('future.no_silent_downcasting', True)
     data_read = read()
 
-    # Phan chia va loc du lieu
     X, Y = split_data(data_read)
     X_train, X_test, Y_train, Y_test = split_test(X, Y, 0.9, 0.1)
 
-    # Tao scale
-    X_train_scaler = MinMaxScaler()
-    Y_train_scaler = MinMaxScaler()
+    X_train, X_test, scaler_X = Norm_Feature_Scaling_Lib(X_train, X_test)
 
-    X_test_scaler = MinMaxScaler()
-    Y_test_scaler = MinMaxScaler()
-
-    # Luu lai Min va Max de revalue (danh cho cac ham viet tay)
-    X_train_Max = get_max(X_train)
-    X_train_Min = get_min(X_train)
-
-    X_test_Max = get_max(X_test)
-    X_test_Min = get_min(X_test)
-
-    Y_train_Max = get_max(Y_train.to_frame())
-    Y_train_Min = get_min(Y_train.to_frame())
-
-    Y_test_Max = get_max(Y_test.to_frame())
-    Y_test_Min = get_min(Y_test.to_frame())
-
-    X_test = lib_Norm_Feature_Scaling(X_test, X_test_scaler)
-    X_train = lib_Norm_Feature_Scaling(X_train, X_train_scaler)
-    
-    k = 22
-    Y_predicted = predict_values(X_test, X_train, Y_train, k)
-
-    newdata_df = pd.DataFrame([newdata], columns=X_train.columns)
-    newdata_scaled = lib_Norm_Feature_Scaling(newdata_df, X_train_scaler)
-    new = predict_value(newdata_scaled.iloc[0], X_train, Y_train, k)
-    newdata.append(new)
-
-    newdata = pd.DataFrame([newdata], columns=data_read.columns)
-    update(newdata)
-    return new
+    k = 7
+    new_data_df = pd.DataFrame([new_data], columns=X_train.columns)
+    new_data_df = replace_missing_with_mean(new_data_df, X)
+    new_data_scaled = pd.DataFrame(scaler_X.transform(new_data_df), columns=new_data_df.columns)
+    predicted_value = predict_value(new_data_scaled.iloc[0], X_train, Y_train, k)
+    new_data_df['Y house price of unit area'] = predicted_value
+    print(new_data_df)
+    update(new_data_df)
+    return predicted_value
 
 def filter(df, values):
     # values[0] and values[1] are the range of the first column
