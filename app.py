@@ -56,6 +56,7 @@ def send():
         str(r['comment']) if r['comment'] is not None else None,
         str(r['selection']) if r['selection'] is not None else None
     ]
+    print(values    )
     snd(values)
 if __name__ == '__main__':
     app.run(debug=True)
