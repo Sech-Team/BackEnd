@@ -1,14 +1,15 @@
 import os
 import boto3
 from dotenv import load_dotenv
-from io import StringIO
+from io import StringIO, BytesIO
 import pandas as pd
 from proc import *
 load_dotenv()
 AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY")
 AWS_SECRET_KEY = os.getenv("AWS_SECRET_KEY")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
-S3_FILE_KEY = "real_estate.csv"
+S3_FILE_KEY_1 = "real_estate.csv"
+S3_FILE_KEY_2 = "contribute.csv"
 s3 = boto3.client(
     "s3",
     aws_access_key_id=AWS_ACCESS_KEY,
@@ -18,7 +19,7 @@ s3 = boto3.client(
 # Ham doc du lieu vao tu CSV
 def read():
     try:
-        obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY)
+        obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_1)
         df = obj['Body'].read().decode('utf-8')  
         df = pd.read_csv(StringIO(df), index_col="No")
 
@@ -34,7 +35,7 @@ def update(new_data):
     new_data_df = pd.DataFrame(new_data)
     data = pd.concat([data, new_data_df], ignore_index="No")
     data.to_csv(csv_buffer, index_label="No")
-    s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY, Body=csv_buffer.getvalue())
+    s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_1, Body=csv_buffer.getvalue())
 
 def cal_predict(new_data):
     data_read = read()
@@ -80,3 +81,20 @@ def filter(df, values):
     df = df.reset_index(drop=True)
 
     return df
+
+def snd(data):
+    print("Dữ liệu mới:", data)
+    
+    obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2)
+    existing_data = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8-sig', errors='replace')), index_col="No")
+    
+    if len(data) != len(existing_data.columns):
+        raise ValueError("Data does not have the same number of elements as the columns in the existing data")
+    
+    new_data_df = pd.DataFrame([data], columns=existing_data.columns)
+    combined_data = pd.concat([existing_data, new_data_df], ignore_index=True)
+    
+    csv_buffer = BytesIO()
+    combined_data.to_csv(csv_buffer, index_label="No", encoding="utf-8-sig")
+    
+    s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2, Body=csv_buffer.getvalue())

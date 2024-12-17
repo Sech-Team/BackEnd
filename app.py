@@ -48,6 +48,14 @@ def showcsv():
     except Exception as e:
         print(f"Lỗi xử lý: {e}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý dữ liệu.'})
-
+    
+@app.route('/send', methods=['POST'])
+def send():
+    r = request.get_json()
+    values = [
+        str(r['comment']) if r['comment'] is not None else None,
+        str(r['selection']) if r['selection'] is not None else None
+    ]
+    snd(values)
 if __name__ == '__main__':
     app.run(debug=True)
