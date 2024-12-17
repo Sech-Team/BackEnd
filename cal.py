@@ -83,7 +83,7 @@ def filter(df, values):
     return df
 
 def snd(data):
-    # print("Dữ liệu mới:", data)
+    print("Dữ liệu mới:", data)
     
     obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2)
     existing_data = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8-sig', errors='replace')), index_col="No")
