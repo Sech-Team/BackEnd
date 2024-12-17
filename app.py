@@ -61,6 +61,7 @@ def send():
         snd(values)
         return jsonify({"status": "success", "message": "Data received successfully"})
     except Exception as e:
+        print(f"Error processing data: {e}")
         return jsonify({"status": "error", "message": str(e)})
 if __name__ == '__main__':
     app.run(debug=True)

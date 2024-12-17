@@ -85,16 +85,16 @@ def filter(df, values):
 def snd(data):
     print("Dữ liệu mới:", data)
     
-    # obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2)
-    # existing_data = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8-sig', errors='replace')), index_col="No")
+    obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2)
+    existing_data = pd.read_csv(StringIO(obj['Body'].read().decode('utf-8-sig', errors='replace')), index_col="No")
     
-    # if len(data) != len(existing_data.columns):
-    #     raise ValueError("Data does not have the same number of elements as the columns in the existing data")
+    if len(data) != len(existing_data.columns):
+        raise ValueError("Data does not have the same number of elements as the columns in the existing data")
     
-    # new_data_df = pd.DataFrame([data], columns=existing_data.columns)
-    # combined_data = pd.concat([existing_data, new_data_df], ignore_index=True)
+    new_data_df = pd.DataFrame([data], columns=existing_data.columns)
+    combined_data = pd.concat([existing_data, new_data_df], ignore_index=True)
     
-    # csv_buffer = BytesIO()
-    # combined_data.to_csv(csv_buffer, index_label="No", encoding="utf-8-sig")
+    csv_buffer = BytesIO()
+    combined_data.to_csv(csv_buffer, index_label="No", encoding="utf-8-sig")
     
-    # s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2, Body=csv_buffer.getvalue())
+    s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2, Body=csv_buffer.getvalue())
