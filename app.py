@@ -51,12 +51,16 @@ def showcsv():
     
 @app.route('/send', methods=['POST'])
 def send():
-    r = request.get_json()
-    values = [
-        str(r['comment']) if r['comment'] is not None else None,
-        str(r['selection']) if r['selection'] is not None else None
-    ]
-    print(values    )
-    snd(values)
+    try:
+        r = request.get_json()
+        values = [
+            str(r['comment']) if r['comment'] is not None else None,
+            str(r['selection']) if r['selection'] is not None else None
+        ]
+        # print(values    )
+        snd(values)
+        return jsonify({"status": "success", "message": "Data received successfully"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
 if __name__ == '__main__':
     app.run(debug=True)
