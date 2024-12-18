@@ -62,15 +62,16 @@ def filter(df, values):
     # values[6] and values[7] are the range of the fourth column
     # values[8] and values[9] are the range of the fifth column
     # values[10] and values[11] is the range of the sixth column
+    # values[12] and values[13] is the range of the seventh column
     minConstraint = df.min()
     maxConstraint = df.max()
     columns = df.columns.tolist()
     j = 0
-    for i in range(0, 12, 2):
+    for i in range(0, 14, 2):
         minConstraint[columns[j]] = values[i]
         j = j + 1
     j = 0
-    for i in range(1, 12, 2):
+    for i in range(1, 14, 2):
         maxConstraint[columns[j]] = values[i]
         j = j + 1
 
