@@ -41,7 +41,9 @@ def showcsv():
             float(r['value5a']),
             float(r['value5b']),
             float(r['value6a']),
-            float(r['value6b'])
+            float(r['value6b']),
+            float(r['value7a']),
+            float(r['value7b'])
         ]
         data = filter(read(), values)
         return jsonify({'result': data.to_html(index=False)})
