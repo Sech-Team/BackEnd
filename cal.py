@@ -99,3 +99,12 @@ def snd(data):
     combined_data.to_csv(csv_buffer, index_label="No", encoding="utf-8-sig")
     
     s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_2, Body=csv_buffer.getvalue())
+
+def fixcsv(values):
+    data = read()
+    last_row = data.iloc[-1]
+    last_row["Y house price of unit area"] = values
+    data.iloc[-1] = last_row
+    csv_buffer = StringIO()
+    data.to_csv(csv_buffer, index_label="No")
+    s3.put_object(Bucket=S3_BUCKET_NAME, Key=S3_FILE_KEY_1, Body=csv_buffer.getvalue())

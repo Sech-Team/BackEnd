@@ -65,5 +65,20 @@ def send():
     except Exception as e:
         print(f"Error processing data: {e}")
         return jsonify({"status": "error", "message": str(e)})
+
+@app.route('/get', methods=['POST'])
+def get():
+    try:
+        r = request.get_json()
+        values = float(r['number']) if r['number'] is not None else None
+
+        if values is None:
+            return jsonify({"status": "error", "message": "Có lỗi xảy ra"})
+
+        fixcsv(values)
+        return jsonify({"status": "success", "message": "Cảm ơn đã đóng góp ý kiến !"})
+    except Exception as e:
+        print(f"Error processing data: {e}")
+        return jsonify({'error': 'Error processing data'})
 if __name__ == '__main__':
     app.run(debug=True)
